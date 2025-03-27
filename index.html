@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jumping Game with Fire Balls</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            text-align: center;
+            background: black;
+            color: white;
+            overflow: hidden;
+        }
+        .game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .character {
+            width: 50px;
+            height: 50px;
+            background: yellow;
+            position: absolute;
+            bottom: 20px;
+            transition: bottom 0.3s ease-out;
+            border-radius: 50%;
+        }
+        .obstacle {
+            width: 30px;
+            height: 30px;
+            background: orange;
+            position: absolute;
+            bottom: 20px;
+            border-radius: 50%;
+            animation: moveObstacle 3s linear infinite;
+            box-shadow: 0 0 10px rgba(255, 69, 0, 0.8), 0 0 15px rgba(255, 69, 0, 0.6);
+        }
+        @keyframes moveObstacle {
+            0% { left: 100%; }
+            100% { left: -30px; }
+        }
+        .ground {
+            width: 100%;
+            height: 50px;
+            background: green;
+            position: absolute;
+            bottom: 0;
+        }
+        .game-over {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: red;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            border-radius: 10px;
+        }
+        .score {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .jump-btn {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background: cyan;
+            border: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .retry-btn {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background: green;
+            border: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="score">Score: <span id="score">0</span></div>
+        <div class="character" id="character"></div>
+        <button class="jump-btn" onclick="jump()">Click to Jump</button>
+        <div class="ground"></div>
+        <div class="game-over" id="gameOver">
+            Game Over!
+            <button class="retry-btn" onclick="startGame()">Try Again</button>
+        </div>
+    </div>
+    <script>
+        let score = 0;
+        let isGameOver = false;
+
+        // Start the game
+        function startGame() {
+            isGameOver = false;
+            score = 0;
+            document.getElementById('score').innerText = score;
+            document.getElementById('gameOver').style.display = 'none';
+
+            // Reset character position
+            let character = document.getElementById('character');
+            character.style.bottom = '20px';
+
+            // Clear all obstacles
+            let obstacles = document.querySelectorAll('.obstacle');
+            obstacles.forEach(obstacle => obstacle.remove());
+
+            // Start the game again
+            setInterval(createObstacle, 1500);
+            setTimeout(endGame, 60000); // Game over after 1 minute
+        }
+
+        // Jump action
+        function jump() {
+            if (isGameOver) return;
+            let character = document.getElementById('character');
+            character.style.bottom = '150px';
+            setTimeout(() => {
+                character.style.bottom = '20px';
+            }, 500);
+            score++;
+            document.getElementById('score').innerText = score;
+
+            // Move the ball up when clicked
+            let ball = document.createElement('div');
+            ball.classList.add('obstacle');
+            document.body.appendChild(ball);
+            let randomHeight = Math.random() * (window.innerHeight - 50);
+            ball.style.top = randomHeight + 'px';
+            ball.style.left = '90%'; // Set it to come from right side
+        }
+
+        // Check for collisions
+        function checkCollision() {
+            let character = document.getElementById('character');
+            let obstacles = document.querySelectorAll('.obstacle');
+            obstacles.forEach((obstacle) => {
+                let characterRect = character.getBoundingClientRect();
+                let obstacleRect = obstacle.getBoundingClientRect();
+
+                if (
+                    characterRect.left < obstacleRect.right &&
+                    characterRect.right > obstacleRect.left &&
+                    characterRect.top < obstacleRect.bottom &&
+                    characterRect.bottom > obstacleRect.top
+                ) {
+                    gameOver();
+                }
+            });
+        }
+
+        // End the game
+        function gameOver() {
+            isGameOver = true;
+            document.getElementById('gameOver').style.display = 'block';
+        }
+
+        // Create a new obstacle
+        function createObstacle() {
+            if (isGameOver) return;
+            let obstacle = document.createElement('div');
+            obstacle.classList.add('obstacle');
+            document.body.appendChild(obstacle);
+            let randomHeight = Math.random() * (window.innerHeight - 50);
+            obstacle.style.top = randomHeight + 'px';
+            obstacle.style.left = '100%'; // Set it to come from right side
+        }
+
+        // Set intervals
+        setInterval(() => {
+            if (!isGameOver) {
+                checkCollision();
+            }
+        }, 50);
+
+        // Game over after 1 minute
+        function endGame() {
+            if (!isGameOver) {
+                gameOver();
+            }
+        }
+
+        setTimeout(endGame, 60000); // Game over after 1 minute
+    </script>
+</body>
+</html>
